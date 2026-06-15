@@ -1,7 +1,14 @@
 package main
 
 import (
+	"context"
 	"os"
+	"strconv"
+
+	agents "einoproject/internal/Agents"
+	"einoproject/internal/config"
+	controller "einoproject/internal/controller"
+	"einoproject/internal/server"
 )
 
 func main() {
@@ -11,5 +18,12 @@ func main() {
 	if configPath == "" {
 		configPath = "../config/config.yaml"
 	}
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		panic(err)
+	}
 
+	registeredAgents := agents.RegisterAgents(context.Background())
+	r := controller.SetRouter(registeredAgents)
+	server.RunGracefully(":"+strconv.Itoa(cfg.Server.Port), r)
 }
