@@ -11,11 +11,26 @@ import (
 type Config struct {
 	ModelConfig ModelConfig  `yaml:"modelconfig"`
 	Server      ServerConfig `yaml:"server"`
+	Db          DbConfig     `yaml:"db"`
+	Redis       RedisConfig  `yaml:"redis"`
 }
 type ModelConfig struct {
 	Apikey  string `yaml:"apikey"`
 	Model   string `yaml:"model"`
 	BaseURL string `yaml:"baseURL"`
+}
+type DbConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbname"`
+}
+type RedisConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 type ServerConfig struct {
 	Port int `yaml:"port"`

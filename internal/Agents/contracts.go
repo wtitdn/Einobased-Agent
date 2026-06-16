@@ -3,12 +3,14 @@ package Agents
 import (
 	"context"
 	"einoproject/internal/Agents/simpleAgent"
+	"einoproject/internal/Agents/toolCallingAgent"
 
 	"github.com/cloudwego/eino/adk"
 )
 
 type Agents struct {
-	SimpleAgent adk.Agent
+	SimpleAgent      adk.Agent
+	toolCallingAgent adk.Agent
 }
 
 func RegisterAgents(ctx context.Context) Agents {
@@ -16,7 +18,11 @@ func RegisterAgents(ctx context.Context) Agents {
 	if err != nil {
 		panic(err)
 	}
-	return Agents{SimpleAgent: simple}
+	toolCalling, err := toolCallingAgent.CreateAgent(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return Agents{SimpleAgent: simple, toolCallingAgent: toolCalling}
 }
 
 func (a Agents) SSEAgents() map[string]adk.Agent {
