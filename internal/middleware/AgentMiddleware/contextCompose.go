@@ -8,7 +8,7 @@ import (
 	"github.com/cloudwego/eino/components/model"
 )
 
-func NewContextComposer(ctx context.Context, chatModel model.BaseChatModel) (adk.ChatModelAgentMiddleware, error) {
+func ContextComposer(ctx context.Context, chatModel model.BaseChatModel) (adk.ChatModelAgentMiddleware, error) {
 	return summarization.New(ctx, &summarization.Config{
 		Model: chatModel,
 		Trigger: &summarization.TriggerCondition{

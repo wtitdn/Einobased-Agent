@@ -13,8 +13,14 @@ type Config struct {
 	Server      ServerConfig `yaml:"server"`
 	Db          DbConfig     `yaml:"db"`
 	Redis       RedisConfig  `yaml:"redis"`
+	Embed       EmbedConfig  `yaml:"textmodelconfig"`
 }
 type ModelConfig struct {
+	Apikey  string `yaml:"apikey"`
+	Model   string `yaml:"model"`
+	BaseURL string `yaml:"baseURL"`
+}
+type EmbedConfig struct {
 	Apikey  string `yaml:"apikey"`
 	Model   string `yaml:"model"`
 	BaseURL string `yaml:"baseURL"`
@@ -75,6 +81,7 @@ func (c Config) ApplyEnv() {
 	setEnvIfNotEmpty("OPENAI_API_KEY", c.ModelConfig.Apikey)
 	setEnvIfNotEmpty("OPENAI_MODEL", c.ModelConfig.Model)
 	setEnvIfNotEmpty("OPENAI_BASE_URL", c.ModelConfig.BaseURL)
+
 }
 
 func setEnvIfNotEmpty(key, value string) {
