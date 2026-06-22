@@ -5,6 +5,7 @@ import (
 	"einoproject/internal/model"
 	"einoproject/internal/usecase"
 	"fmt"
+	"net/url"
 	"sync"
 	"time"
 
@@ -47,6 +48,39 @@ type SessionBrowserTool struct {
 type sessionBrowser struct {
 	tool     *browseruse.Tool
 	lastUsed time.Time
+}
+
+type fallbackSearch struct {
+	primary duckduckgo.Search
+}
+
+func (s fallbackSearch) TextSearch(ctx context.Context, req *duckduckgo.TextSearchRequest) (*duckduckgo.TextSearchResponse, error) {
+	if s.primary != nil {
+		result, err := s.primary.TextSearch(ctx, req)
+		if err == nil && result != nil && len(result.Results) > 0 {
+			return result, nil
+		}
+	}
+
+	query := ""
+	if req != nil {
+		query = req.Query
+	}
+	if query == "" {
+		return &duckduckgo.TextSearchResponse{Message: "search query is empty"}, nil
+	}
+
+	searchURL := "https://www.bing.com/search?q=" + url.QueryEscape(query)
+	return &duckduckgo.TextSearchResponse{
+		Message: "DuckDuckGo did not return results in time; opened a fallback search results page.",
+		Results: []*duckduckgo.TextSearchResult{
+			{
+				Title:   "Fallback search results",
+				URL:     searchURL,
+				Summary: "Fallback search page for: " + query,
+			},
+		},
+	}, nil
 }
 
 func (t *SessionBrowserTool) Info(ctx context.Context) (*schema.ToolInfo, error) {
@@ -107,15 +141,16 @@ func (t *SessionBrowserTool) browserForSession(ctx context.Context, sessionID st
 func (t *SessionBrowserTool) newBrowser(ctx context.Context) (*browseruse.Tool, error) {
 	searchTool, err := duckduckgo.NewSearch(ctx, &duckduckgo.Config{
 		MaxResults: 5,
-		Region:     duckduckgo.RegionCN,
+		Region:     duckduckgo.RegionWT,
+		Timeout:    8 * time.Second,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	but, err := browseruse.NewBrowserUseTool(ctx, &browseruse.Config{
-		Headless:         true,
-		DDGSearchTool:    searchTool,
+		Headless:         false,
+		DDGSearchTool:    fallbackSearch{primary: searchTool},
 		ExtractChatModel: model.NewChatModel(),
 	})
 	if err != nil {

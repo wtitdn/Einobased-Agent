@@ -8,6 +8,8 @@ type SSEEvent struct {
 	ConversationID string            `json:"conversation_id,omitempty"`
 	AgentName      string            `json:"agent_name,omitempty"`
 	RunPath        string            `json:"run_path,omitempty"`
+	Role           string            `json:"role,omitempty"`
+	ToolName       string            `json:"tool_name,omitempty"`
 	Content        string            `json:"content,omitempty"`
 	ToolCalls      []schema.ToolCall `json:"tool_calls,omitempty"`
 	ActionType     string            `json:"action_type,omitempty"`

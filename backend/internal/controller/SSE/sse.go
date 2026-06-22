@@ -31,6 +31,12 @@ func AgentSSE(agent adk.Agent, conversationUsecase *usecase.ConversationUsecase)
 			return
 		}
 
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+		c.Header("Connection", "keep-alive")
+		c.Header("X-Accel-Buffering", "no")
+		c.Header("Transfer-Encoding", "chunked")
+
 		ctx, cancel := context.WithCancel(c.Request.Context())
 		defer cancel()
 
@@ -52,6 +58,11 @@ func AgentSSE(agent adk.Agent, conversationUsecase *usecase.ConversationUsecase)
 		}()
 
 		events := conversationUsecase.StreamAgent(ctx, agent, userID, sessionID, message)
+
+		if _, err := c.Writer.Write([]byte("retry: 86400000\n\n")); err != nil {
+			return
+		}
+		c.Writer.Flush()
 
 		c.Stream(func(w io.Writer) bool {
 			select {

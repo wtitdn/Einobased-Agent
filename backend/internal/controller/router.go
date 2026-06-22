@@ -20,10 +20,19 @@ func SetRouter(registeredAgents agents.Agents, db *gorm.DB, redisClient *redis.C
 	accountRepository := repo.NewAccountRepo(db)
 	accountService := usecase.NewAccountService(accountRepository)
 	accountHandler := handler.NewAccountHandler(accountService)
+	agentNames := make([]string, 0, len(registeredAgents.SSEAgents()))
+	for name := range registeredAgents.SSEAgents() {
+		agentNames = append(agentNames, name)
+	}
+	agentService := usecase.NewAgentService(agentNames)
+	agentHandler := handler.NewAgentHandler(agentService)
+	r.GET("/agents", agentHandler.ListAgents)
+
 	accountGroup := r.Group("/account")
 	{
 		accountGroup.POST("/register", accountHandler.CreateAccount)
 		accountGroup.POST("/login", accountHandler.Login)
+
 	}
 
 	conversationGroup := r.Group("/conversation")
